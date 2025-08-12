@@ -1,5 +1,5 @@
 *---------------------------------------------------------------
-* Challenge 1: RC Low-Pass Filter Optimization
+* Challenge: RC Low-Pass Filter Optimization
 *---------------------------------------------------------------
 * You are given an RC low-pass filter with a fixed capacitor C1
 * and a variable resistor R1. The circuit is driven by an AC
@@ -7,23 +7,22 @@
 *
 *   V1
 * (AC 1V)
-*
-*
-*    R1
-*
-*    out
-* ----
-* ---- C1 (10µF)
-*
+*   │
+*  ┌┴┐
+*  │ │ R1
+*  └┬┘
+*   ├─────── out
+* --┴--
+* --┬-- C1 (10µF)
+*   │
 *  GND
 *
 * TASK:
 * 1. There are hidden errors in this netlist. Fix them
 *    so that it runs correctly in LTspice.
-* 2. Sweep R1 to find the value where the magnitude of the gain
+* 2. Sweep R1 to find the minimum value where the magnitude of the gain
 *    at 1 kHz equals the target gain (Gain_target).
-* 3. Among all resistor values that meet the target gain, choose
-*    the one with the lowest power dissipation in R1.
+* 3. Get the voltage noise power spectral density S at 1kHz.
 * 4. As soon as you have the correct R1 value, commit and push
 *    your fixed netlist to the repo as fast as you can.
 *    The first to do so wins the prize.
@@ -39,7 +38,7 @@
 .paran F_target=1k
 .param Gain_target=0.5
 
-V1 in 0 SINE(0 1 {F_target}) AC 1
+V1 in 0 SINE(0 1 {F_target})
 R1 in out {R1}
 C1 out ground 10u
 
@@ -47,14 +46,18 @@ C1 out ground 10u
 .step param R1 100 10k 1
 
 * AC analysis: 10 Hz to 10 kHz, 50 points/decade
-.ac dec 50 10 10k
+.ac log 50 10 10k
 
 * plot 6 periods of the signal
 .tran 0 {6/F_target}
 
+* noise and gain analysis
+.noise V(out) V1 dec 50 10
+
 *---------------------------------------------------------------
-* FINAL ANSWER — Enter the R1 value you found here:
-* R1_value = ___________ Ω
+* FINAL ANSWER — Enter the values you found here:
+* R1 = ___________ Ω
+* S(1kHz)= __________ V/sqrt(Hz)
 *---------------------------------------------------------------
 
 .end
