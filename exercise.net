@@ -35,28 +35,47 @@
 *---------------------------------------------------------------
 
 .param R1=100
-.paran F_target=1k
+.param F_target=1k
 .param Gain_target=0.5
 
-V1 in 0 SINE(0 1 {F_target})
+*V1 in 0 SIN(0 1 {F_target})
+V1 in 0 ac 1
 R1 in out {R1}
-C1 out ground 10u
+C1 out 0 10u
 
 * Sweep R1 from 100 Ω to 10 kΩ in 100 Ω steps
-.step param R1 100 10k 1
+*.step param R1 100 10k 1
+
 
 * AC analysis: 10 Hz to 10 kHz, 50 points/decade
-.ac log 50 10 10k
+*.ac dec 50 10 10k
+*
+*.control
+*let start_r = 25
+*let stop_r = 35
+*let delta_r = 1
+*let r_act = start_r
+** loop
+*while r_act le stop_r
+*alter r1 r_act
+*run
+*write dc-sweep.out v(out)
+*set appendwrite
+*let r_act = r_act + delta_r
+*end
+*plot db(ac1.v(out)) db(ac2.v(out)) db(ac3.v(out)) db(ac4.v(out)) db(ac5.v(out))
+*+ db(ac6.v(out)) db(ac7.v(out)) db(ac8.v(out)) db(ac9.v(out)) db(ac10.v(out))
+*.endc
 
 * plot 6 periods of the signal
-.tran 0 {6/F_target}
+*.tran {1/(F_target*100)} {6/F_target}
 
 * noise and gain analysis
-.noise V(out) V1 dec 50 10
+.noise V(out) V1 dec 50 10 1k
 
 *---------------------------------------------------------------
 * FINAL ANSWER — Enter the values you found here:
-* R1 = ___________ Ω
+* R1 = 27 Ω
 * S(1kHz)= __________ V/sqrt(Hz)
 *---------------------------------------------------------------
 
